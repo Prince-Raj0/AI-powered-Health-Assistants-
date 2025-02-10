@@ -4,3 +4,4 @@ tensorflow
 nltk
 tf-keras
 npx
+torch

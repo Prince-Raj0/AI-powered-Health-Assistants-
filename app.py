@@ -1,17 +1,17 @@
 import streamlit as st
 from transformers import pipeline
 import nltk
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize  # Make absolutely sure this is used!
 from nltk.corpus import stopwords
-import tensorflow as tf
+import torch # Import torch
 import os
-import tempfile  # Import tempfile
+import tempfile
 
-# 1. Get a temporary directory (for Streamlit Cloud compatibility)
+# 1. NLTK Data Path (using tempfile)
 try:
-    NLTK_DATA_PATH = os.path.join(tempfile.gettempdir(), "nltk_data")  # Use tempdir
+    NLTK_DATA_PATH = os.path.join(tempfile.gettempdir(), "nltk_data")
 except:
-    NLTK_DATA_PATH = ".nltk_data" # Fallback if tempfile fails (for local running)
+    NLTK_DATA_PATH = ".nltk_data"
 
 if not os.path.exists(NLTK_DATA_PATH):
     os.makedirs(NLTK_DATA_PATH)
@@ -38,7 +38,7 @@ if st.button("Submit"):
             # Preprocessing
             try:  # Error handling for preprocessing
                 text = user_input.lower()
-                tokens = word_tokenize(text)
+                tokens = word_tokenize(text)  # Double, triple check this line!
                 stop_words = set(stopwords.words('english'))
                 filtered_tokens = [w for w in tokens if not w in stop_words and w.isalnum()]
                 processed_input = " ".join(filtered_tokens)
@@ -48,9 +48,9 @@ if st.button("Submit"):
 
             messages = [{"role": "user", "content": processed_input}]
 
-            # Model Loading and Generation (with try-except)
+            # Model Loading and Generation (with try-except and CORRECT pipeline)
             try:
-                pipe = pipeline("text-generation", model="deepseek-ai/DeepSeek-R1", trust_remote_code=True) # Or a suitable model
+                pipe = pipeline("text-generation", model="deepseek-ai/DeepSeek-R1", trust_remote_code=True, device=0 if torch.cuda.is_available() else -1)  # Use torch pipeline
                 response = pipe(messages, max_new_tokens=200) # Adjust max_new_tokens
 
                 st.write("AI Assistant's Response:")
@@ -75,7 +75,7 @@ if st.button("Submit"):
 def preprocess_text(text):  # Example of more advanced preprocessing (not used directly, but available)
     try:
         text = text.lower()
-        tokens = word_tokenize(text)
+        tokens = word_tokenize(text)  # Again, make sure this is word_tokenize
         stop_words = set(stopwords.words('english'))
         filtered_tokens = [w for w in tokens if not w in stop_words and w.isalnum()]
         # Add stemming or lemmatization here if needed
@@ -84,4 +84,3 @@ def preprocess_text(text):  # Example of more advanced preprocessing (not used d
         st.error(f"Error in preprocess_text function: {preprocess_error}")
         return "" # Return empty string in case of error
 
-                              

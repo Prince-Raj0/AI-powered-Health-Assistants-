@@ -1,8 +1,8 @@
 import streamlit as st
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline  # Import necessary modules
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import nltk
-from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
 import torch
 import os
 import tempfile
@@ -27,7 +27,6 @@ except LookupError:
         nltk.download('punkt', download_dir=NLTK_DATA_PATH)
         nltk.download('stopwords', download_dir=NLTK_DATA_PATH)
 
-
 # 3. Load Mistral model (with enhanced error handling and caching)
 @st.cache_resource
 def load_mistral_model():
@@ -51,8 +50,8 @@ def healthcare_chatbot(user_input):
         messages = [{"role": "user", "content": user_input}]  # Format as messages for Mistral
         response = mistral_pipe(messages, max_new_tokens=300)
 
-        if isinstance(response, list) and len(response) > 0 and 'generated_text' in response[0]:
-            return response[0]['generated_text']
+        if isinstance(response, list) and len(response) > 0 and 'generated_text' in response:
+            return response['generated_text']
         else:
             return "I'm still learning. Please try another query."  # Handle unexpected response format
 

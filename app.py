@@ -10,7 +10,7 @@ nltk.download('stopwords')
 
 
 # Load a pre-trained Hugging Face model
-chatbot = pipeline("text-generation", model="huzaifa525/MedGenius_LLaMA-3.2B")
+chatbot = pipeline("text-generation", model="deepseek-ai/DeepSeek-R1")
 
 
 # Define healthcare-specific response logic (or use a model to generate responses)

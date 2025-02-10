@@ -31,8 +31,8 @@ except LookupError:
 @st.cache_resource
 def load_mistral_model():
     try:
-        tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
-        model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", device_map="auto", torch_dtype=torch.bfloat16)
+        tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-Small-24B-Instruct-2501")
+        model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-Small-24B-Instruct-2501", device_map="auto", torch_dtype=torch.bfloat16)  # Use bfloat16 for memory efficiency
         pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, device_map="auto", torch_dtype=torch.bfloat16)
         return pipe
     except Exception as e:
@@ -50,8 +50,8 @@ def healthcare_chatbot(user_input):
         messages = [{"role": "user", "content": user_input}]  # Format as messages for Mistral
         response = mistral_pipe(messages, max_new_tokens=300)
 
-        if isinstance(response, list) and len(response) > 0 and 'generated_text' in response:
-            return response['generated_text']
+        if isinstance(response, list) and len(response) > 0 and 'generated_text' in response[0]:
+            return response[0]['generated_text']
         else:
             return "I'm still learning. Please try another query."  # Handle unexpected response format
 
@@ -77,4 +77,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

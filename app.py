@@ -1,51 +1,55 @@
 import streamlit as st
 from transformers import pipeline
 import nltk
-from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+import tensorflow as tf
 
-# Download necessary NLTK data
-nltk.download('punkt')
-nltk.download('stopwords')
+try:
+    nltk.data.find('tokenizers/punkt')
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('punkt')
+    nltk.download('stopwords')
 
+st.title("AI-Powered Health Assistant")
 
-# Load a pre-trained Hugging Face model
-chatbot = pipeline("text-generation", model="distilgpt2")
+user_input = st.text_area("Enter your health query:", height=150)
 
+if st.button("Submit"):
+    if user_input:
+        try:
+            text = user_input.lower()
+            tokens = word_tokenize(text)
+            stop_words = set(stopwords.words('english'))
+            filtered_tokens = [w for w in tokens if not w in stop_words and w.isalnum()]
+            processed_input = " ".join(filtered_tokens)
 
-# Define healthcare-specific response logic (or use a model to generate responses)
-def healthcare_chatbot(user_input):
-    # Simple rule-based keywords to respond
-    if "symptom" in user_input:
-        return "It seems like you're experiencing symptoms. Please consult a doctor for accurate advice."
-    elif "appointment" in user_input:
-        return "Would you like me to schedule an appointment with a doctor?"
-    elif "medication" in user_input:
-        return "It's important to take your prescribed medications regularly. If you have concerns, consult your doctor."
+            messages = [{"role": "user", "content": processed_input}]
+
+            pipe = pipeline("text-generation", model="deepseek-ai/DeepSeek-R1", trust_remote_code=True)  # Or another suitable model
+            response = pipe(messages, max_new_tokens=200)  # Adjust max_new_tokens
+
+            st.write("AI Assistant's Response:")
+
+            if isinstance(response, list) and len(response) > 0 and 'generated_text' in response[0]:
+                st.write(response[0]['generated_text'])
+            elif isinstance(response, str):
+                st.write(response)
+            else:
+                st.write(response)
+
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
     else:
-        # For other inputs, use the Hugging Face model to generate a response
-        response = chatbot(user_input, max_length=300, num_return_sequences=1)
-        # Specifies the maximum length of the generated text response, including the input and the generated tokens.
-        # If set to 3, the model generates three different possible responses based on the input.
-        return response[0]['generated_text']
+        st.warning("Please enter a query.")
 
 
-# Streamlit web app interface
-def main():
-    # Set up the web app title and input area
-    st.title("Healthcare Assistant Chatbot")
-    
-    # Display a simple text input for user queries
-    user_input = st.text_input("How can I assist you today?", "")
-    
-    # Display chatbot response
-    if st.button("Submit"):
-        if user_input:
-            st.write("User: ", user_input)
-            response = healthcare_chatbot(user_input)
-            st.write("Healthcare Assistant: ", response)
-        else:
-            st.write("Please enter a query.")
+def preprocess_text(text):  # Example of more advanced preprocessing (not used directly, but you can add it)
+    text = text.lower()
+    tokens = word_tokenize(text)
+    stop_words = set(stopwords.words('english'))
+    filtered_tokens = [w for w in tokens if not w in stop_words and w.isalnum()]
+    # Add stemming or lemmatization here if needed (e.g., Porter Stemmer, WordNet Lemmatizer)
+    return " ".join(filtered_tokens)
 
-if __name__ == "__main__":
-    main()

@@ -27,13 +27,19 @@ except LookupError:
         nltk.download('punkt', download_dir=NLTK_DATA_PATH)
         nltk.download('stopwords', download_dir=NLTK_DATA_PATH)
 
-# 3. Load Mistral model (with enhanced error handling and caching)
+# 3. Load Mistral model (with enhanced error handling and caching, using st.secrets)
 @st.cache_resource
 def load_mistral_model():
+    HF_AUTH_TOKEN = st.secrets.get("HF_AUTH_TOKEN") # Get token from secrets
+
+    if not HF_AUTH_TOKEN:  # Check if the token is available
+        st.error("HF_AUTH_TOKEN secret not found. Please set it in Streamlit Cloud.")
+        return None  # Return None if the token is not available
+
     try:
-        tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-Small-24B-Instruct-2501")
-        model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-Small-24B-Instruct-2501", device_map="auto", torch_dtype=torch.bfloat16)  # Use bfloat16 for memory efficiency
-        pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, device_map="auto", torch_dtype=torch.bfloat16)
+        tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-Small-24B-Instruct-2501", use_auth_token=HF_AUTH_TOKEN)
+        model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-Small-24B-Instruct-2501", device_map="auto", torch_dtype=torch.bfloat16, use_auth_token=HF_AUTH_TOKEN)
+        pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, device_map="auto", torch_dtype=torch.bfloat16, use_auth_token=HF_AUTH_TOKEN)
         return pipe
     except Exception as e:
         st.error(f"Error loading Mistral model: {e}")
@@ -77,3 +83,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

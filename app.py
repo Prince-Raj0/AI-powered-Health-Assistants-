@@ -4,14 +4,14 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
-Download necessary NLTK data
+#Download necessary NLTK data
 nltk.download('punkt')
 nltk.download('stopwords')
 
-Load a pre-trained Hugging Face model
+#Load a pre-trained Hugging Face model
 chatbot = pipeline("text-generation", model="deepseek-ai/DeepSeek-R1", trust_remote_code=True)
 
-Define healthcare-specific response logic (or use a model to generate responses)
+#Define healthcare-specific response logic (or use a model to generate responses)
 def healthcare_chatbot(user_input):
     # Simple rule-based keywords to respond
     if "symptom" in user_input:
@@ -25,7 +25,7 @@ def healthcare_chatbot(user_input):
         response = chatbot(user_input, max_length=500, num_return_sequences=1)
         return response[0]['generated_text']
 
-Streamlit web app interface
+#Streamlit web app interface
 def main():
     # Set up the web app title and input area
     st.title("Healthcare Assistant Chatbot")

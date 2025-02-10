@@ -5,28 +5,27 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import tensorflow as tf
 import os
+import tempfile  # Import tempfile
 
-@st.cache_resource  # Decorate a function to load/download NLTK data
-def load_nltk_data():
-    NLTK_DATA_PATH = os.path.join(st.cache_resource.get_cache_dir(), "nltk_data")
+# 1. Get a temporary directory (for Streamlit Cloud compatibility)
+try:
+    NLTK_DATA_PATH = os.path.join(tempfile.gettempdir(), "nltk_data")  # Use tempdir
+except:
+    NLTK_DATA_PATH = ".nltk_data" # Fallback if tempfile fails (for local running)
 
-    if not os.path.exists(NLTK_DATA_PATH):
-        os.makedirs(NLTK_DATA_PATH)
+if not os.path.exists(NLTK_DATA_PATH):
+    os.makedirs(NLTK_DATA_PATH)
 
-    nltk.data.path.append(NLTK_DATA_PATH)
+nltk.data.path.append(NLTK_DATA_PATH)
 
-    try:
-        nltk.data.find('tokenizers/punkt')
-        nltk.data.find('corpora/stopwords')
-    except LookupError:
-        with st.spinner("Downloading NLTK data..."):
-            nltk.download('punkt', download_dir=NLTK_DATA_PATH)
-            nltk.download('stopwords', download_dir=NLTK_DATA_PATH)
-    
-    return True # Return True to indicate success (not strictly necessary, but good practice)
-
-# Load the NLTK data (this will now be cached)
-load_nltk_data()
+# 2. Download NLTK data (using the correct resource name and path)
+try:
+    nltk.data.find('tokenizers/punkt')
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    with st.spinner("Downloading NLTK data..."):
+        nltk.download('punkt', download_dir=NLTK_DATA_PATH)
+        nltk.download('stopwords', download_dir=NLTK_DATA_PATH)
 
 
 st.title("AI-Powered Health Assistant")
@@ -84,3 +83,5 @@ def preprocess_text(text):  # Example of more advanced preprocessing (not used d
     except Exception as preprocess_error:
         st.error(f"Error in preprocess_text function: {preprocess_error}")
         return "" # Return empty string in case of error
+
+                              

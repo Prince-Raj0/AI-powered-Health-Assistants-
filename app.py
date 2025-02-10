@@ -30,16 +30,16 @@ except LookupError:
 # 3. Load Mistral model (with enhanced error handling and caching, using st.secrets)
 @st.cache_resource
 def load_mistral_model():
-    HF_AUTH_TOKEN = st.secrets.get("HF_AUTH_TOKEN") # Get token from secrets
+    HF_AUTH_TOKEN = st.secrets.get("HF_AUTH_TOKEN")  # Get token from secrets
 
     if not HF_AUTH_TOKEN:  # Check if the token is available
         st.error("HF_AUTH_TOKEN secret not found. Please set it in Streamlit Cloud.")
         return None  # Return None if the token is not available
 
     try:
-        tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-Small-24B-Instruct-2501", use_auth_token=HF_AUTH_TOKEN)
-        model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-Small-24B-Instruct-2501", device_map="auto", torch_dtype=torch.bfloat16, use_auth_token=HF_AUTH_TOKEN)
-        pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, device_map="auto", torch_dtype=torch.bfloat16, use_auth_token=HF_AUTH_TOKEN)
+        tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-Small-24B-Instruct-2501", token=HF_AUTH_TOKEN)  # Use token here
+        model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-Small-24B-Instruct-2501", device_map="auto", torch_dtype=torch.bfloat16, token=HF_AUTH_TOKEN)  # Use token here
+        pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, device_map="auto", torch_dtype=torch.bfloat16)  # No use_auth_token here
         return pipe
     except Exception as e:
         st.error(f"Error loading Mistral model: {e}")
@@ -83,4 +83,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
+        
